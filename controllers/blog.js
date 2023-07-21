@@ -42,16 +42,18 @@ router
   .patch("/:blogId", async (request, response) => {
     const blogId = request.params.blogId;
     const update = request.body;
-    const tags = update.tags.includes(",")
+    const tags = update?.tags?.includes(",")
       ? update.tags.split(",")?.map((tag) => tag.trim().toLowerCase())
       : update.tags;
+
+    const blog = await Blog.findById(blogId);
+
     const extras = {
-      tags,
+      tags: (tags ? tags : blog?.tags) || [],
       edited: true,
       published: Date().toString(),
     };
 
-    const blog = await Blog.findById(blogId);
     if (blog) {
       try {
         await Blog.findByIdAndUpdate(blogId, { ...update, ...extras });
